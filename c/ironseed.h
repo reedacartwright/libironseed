@@ -38,16 +38,20 @@ typedef struct ironseed_input ironseed_input_t;
 struct ironseed;
 typedef struct ironseed ironseed_t;
 
+ironseed_input_t *ironseed_input_create(size_t bits);
+void ironseed_input_free(ironseed_input_t *p);
 
-ironseed_input_t* ironseed_input_create(size_t bits);
-void ironseed_input_free(ironseed_input_t* p);
-
-void ironseed_input_update(ironseed_input_t* p, uint32_t value);
-void ironseed_input_update_u32(ironseed_input_t* p, uint32_t value);
-void ironseed_input_update_u64(ironseed_input_t* p, uint64_t value);
-void ironseed_input_update_dbl(ironseed_input_t* p, double value);
-void ironseed_input_update_flt(ironseed_input_t* p, float value);
-void ironseed_input_update_ptr(ironseed_input_t* p, void * value);
+void ironseed_input_update(ironseed_input_t *p, uint32_t value);
+void ironseed_input_update_u32(ironseed_input_t *p, uint32_t value);
+void ironseed_input_update_u64(ironseed_input_t *p, uint64_t value);
+void ironseed_input_update_dbl(ironseed_input_t *p, double value);
+void ironseed_input_update_flt(ironseed_input_t *p, float value);
+void ironseed_input_update_ptr(ironseed_input_t *p, const void *value);
+void ironseed_input_update_obj(ironseed_input_t *p, const void *value,
+                               size_t length);
+void ironseed_input_update_buf(ironseed_input_t *p, const char *value,
+                               size_t length);
+void ironseed_input_update_str(ironseed_input_t *p, const char *value);
 
 #ifdef __cplusplus
 }

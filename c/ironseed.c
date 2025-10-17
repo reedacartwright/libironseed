@@ -22,9 +22,9 @@
 # SOFTWARE.
 */
 
+#include <memory.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <memory.h>
 
 #include "ironseed.h"
 
@@ -52,14 +52,14 @@ struct ironseed {
   uint32_t seeds[];
 };
 
-ironseed_input_t* ironseed_input_create(size_t bits) {
+ironseed_input_t *ironseed_input_create(size_t bits) {
   if (bits == 0) {
     return NULL;
   }
-  size_t length = 2*(((bits - 1) / 64) + 1);
+  size_t length = 2 * (((bits - 1) / 64) + 1);
 
-  ironseed_input_t *p = malloc(
-    sizeof(ironseed_input_t) + length * sizeof(uint64_t));
+  ironseed_input_t *p =
+      malloc(sizeof(ironseed_input_t) + length * sizeof(uint64_t));
 
   p->num_digests = length;
   p->coef = init_hash4i_coef();
@@ -70,44 +70,76 @@ ironseed_input_t* ironseed_input_create(size_t bits) {
   return p;
 }
 
-void ironseed_input_free(ironseed_input_t* p) {
-  if(p == NULL) {
+void ironseed_input_free(ironseed_input_t *p) {
+  if (p == NULL) {
     return;
   }
   free(p);
 }
 
-void ironseed_input_update(ironseed_input_t* p, uint32_t value) {
-  if(p == NULL) {
+void ironseed_input_update(ironseed_input_t *p, uint32_t value) {
+  if (p == NULL) {
     return;
   }
-  for(size_t i = 0; i < p->num_digests; ++i) {
+  for (size_t i = 0; i < p->num_digests; ++i) {
     p->digests[i] += hash4i_coef(&p->coef) * value;
   }
 }
 
-void ironseed_input_update_u32(ironseed_input_t* p, uint32_t value) {
+void ironseed_input_update_u32(ironseed_input_t *p, uint32_t value) {
   ironseed_input_update(p, value);
 }
 
-void ironseed_input_update_u64(ironseed_input_t* p, uint64_t value) {
+void ironseed_input_update_u64(ironseed_input_t *p, uint64_t value) {
   ironseed_input_update(p, (uint32_t)value);
   ironseed_input_update(p, (uint32_t)(value >> 32));
 }
 
-void ironseed_input_update_dbl(ironseed_input_t* p, double value) {
+void ironseed_input_update_dbl(ironseed_input_t *p, double value) {
   uint64_t u;
   memcpy(&u, &value, sizeof(u));
   ironseed_input_update_u64(p, u);
 }
 
-void ironseed_input_update_flt(ironseed_input_t* p, float value) {
+void ironseed_input_update_flt(ironseed_input_t *p, float value) {
   uint32_t u;
   memcpy(&u, &value, sizeof(u));
   ironseed_input_update_u32(p, u);
 }
 
-void ironseed_input_update_ptr(ironseed_input_t* p, void *value) {
+void ironseed_input_update_ptr(ironseed_input_t *p, const void *value) {
   ironseed_input_update_u64(p, (uint64_t)((uintptr_t)value));
 }
 
+void ironseed_input_update_obj(ironseed_input_t *p, const void *obj,
+                               size_t len) {
+
+  const char *buf = (const char *)obj;
+  size_t i = 0;
+  for (; i + 4 < len; i += 4) {
+    uint32_t u;
+    memcpy(&u, buf, sizeof(u));
+    ironseed_input_update(p, u);
+    buf += 4;
+  }
+  uint32_t u = 0;
+  memcpy(&u, buf, len - i);
+  ironseed_input_update(p, u);
+}
+
+void ironseed_input_update_buf(ironseed_input_t *p, const char *str,
+                               size_t len) {
+  if (p == NULL) {
+    return;
+  }
+
+  ironseed_input_update(p, (uint32_t)len);
+  if (len == 0) {
+    return;
+  }
+  ironseed_input_update_obj(p, str, len);
+}
+
+void ironseed_input_update_str(ironseed_input_t *p, const char *str) {
+  ironseed_input_update_buf(p, str, strlen(str));
+}
