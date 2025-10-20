@@ -42,6 +42,7 @@ ironseed_input_t *ironseed_input_create(size_t bits);
 ironseed_input_t *ironseed_input_clone(const ironseed_input_t *p);
 void ironseed_input_free(ironseed_input_t *p);
 size_t ironseed_input_size(const ironseed_input_t *p);
+const uint64_t *ironseed_input_digests(const ironseed_input_t *p);
 
 void ironseed_input_update(ironseed_input_t *p, uint32_t value);
 void ironseed_input_update_u32(ironseed_input_t *p, uint32_t value);

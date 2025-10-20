@@ -110,6 +110,9 @@ void ironseed_input_free(ironseed_input_t *p) {
 }
 
 size_t ironseed_input_size(const ironseed_input_t *p) { return p->size; }
+const uint64_t *ironseed_input_digests(const ironseed_input_t *p) {
+  return p->digests;
+}
 
 void ironseed_input_update(ironseed_input_t *p, uint32_t value) {
   if (p == NULL) {
@@ -217,7 +220,7 @@ ironseed_t *ironseed_create_from_input(const ironseed_input_t *p) {
 
   uint64_t k = p->coef;
   for (size_t i = 0; i < length; ++i) {
-    uint64_t u = q->values[i] + hash_input_coef_next(&k);
+    uint64_t u = p->digests[i] + hash_input_coef_next(&k);
     q->values[i] = finalmix(u);
   }
 
